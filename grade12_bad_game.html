@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    background: repeating-linear-gradient(45deg, #ff00ff, #ff00ff 10px, #00ffff 10px, #00ffff 20px);
+    font-family: "Comic Sans MS", cursive;
+    margin: 0;
+    padding: 10px;
+    min-height: 100vh;
+  }
+  #mainBox {
+    background: yellow;
+    border: 8px dashed red;
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 15px;
+    border-radius: 0px;
+    box-shadow: 15px 15px 0px lime;
+  }
+  h1 {
+    color: purple;
+    text-align: center;
+    font-size: 28px;
+    text-shadow: 3px 3px orange, -2px -2px blue;
+    margin-bottom: 2px;
+    animation: spin 3s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+    100% { transform: rotate(-2deg); }
+  }
+  .subtitle {
+    text-align: center;
+    color: darkred;
+    font-size: 11px;
+    margin-bottom: 10px;
+  }
+  #scoreArea {
+    display: flex;
+    justify-content: space-between;
+    background: lime;
+    border: 3px solid black;
+    padding: 5px 10px;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+  #scoreArea span { font-weight: bold; }
+  #timerDisplay { color: red; font-size: 22px; font-weight: bold; }
+  #questionBox {
+    background: white;
+    border: 5px solid blue;
+    padding: 12px;
+    margin-bottom: 10px;
+    min-height: 70px;
+  }
+  #questionText {
+    font-size: 16px;
+    color: #000080;
+    margin-bottom: 10px;
+  }
+  .answerBtn {
+    display: block;
+    width: 100%;
+    margin: 5px 0;
+    padding: 8px;
+    font-family: "Comic Sans MS", cursive;
+    font-size: 14px;
+    cursor: pointer;
+    border: 3px solid black;
+    background: #ff9999;
+    text-align: left;
+  }
+  .answerBtn:hover { background: #ffff00; }
+  .answerBtn:nth-child(2) { background: #99ff99; }
+  .answerBtn:nth-child(3) { background: #9999ff; color: white; }
+  .answerBtn:nth-child(4) { background: #ff99ff; }
+  #feedback {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    min-height: 28px;
+    margin: 5px 0;
+  }
+  #nextBtn {
+    display: none;
+    background: orange;
+    border: 4px solid black;
+    padding: 10px 20px;
+    font-family: "Comic Sans MS", cursive;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 5px auto;
+    display: block;
+  }
+  #nextBtn:hover { background: red; color: white; }
+  #hintBox {
+    background: pink;
+    border: 2px dashed purple;
+    padding: 8px;
+    font-size: 12px;
+    margin-top: 8px;
+    display: none;
+  }
+  #hintBtn {
+    background: #ccccff;
+    border: 3px solid purple;
+    padding: 5px 10px;
+    font-family: "Comic Sans MS", cursive;
+    cursor: pointer;
+    font-size: 13px;
+    display: block;
+    margin: 5px auto;
+  }
+  #progressBar {
+    background: grey;
+    height: 20px;
+    border: 2px solid black;
+    margin-bottom: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  #progressFill {
+    background: repeating-linear-gradient(90deg, red, blue 30px);
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s;
+  }
+  #endScreen {
+    display: none;
+    text-align: center;
+    padding: 20px;
+  }
+  #endScreen h2 { color: red; font-size: 32px; }
+  #restartBtn {
+    background: green;
+    color: white;
+    border: 4px solid black;
+    padding: 10px 30px;
+    font-family: "Comic Sans MS", cursive;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+  #marqueeArea {
+    background: black;
+    color: lime;
+    font-family: "Comic Sans MS", cursive;
+    padding: 5px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  #floatingStars {
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    font-size: 30px;
+    z-index: 9999;
+    display: none;
+  }
+  .lives-display { color: darkred; font-size: 20px; }
+  #debugBox {
+    background: black;
+    color: #00ff00;
+    font-size: 10px;
+    padding: 5px;
+    margin-top: 8px;
+    font-family: monospace;
+    max-height: 40px;
+    overflow: hidden;
+  }
+  #bonusCounter {
+    font-size: 11px;
+    color: #555;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+
+<div id="floatingStars">⭐⭐⭐</div>
+
+<div id="mainBox">
+  <h1>🎓 GRADE 12 MEGA QUIZ XTREME 🎓</h1>
+  <div class="subtitle">Educational Software v0.0.1 BETA (NOT TESTED)</div>
+
+  <div id="marqueeArea">
+    <span id="marqueeText">⚡ WELCOME TO THE QUIZ!! GET READY TO LEARN!! GOOD LUCK!! YOU NEED IT!! ⚡ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+  </div>
+
+  <div id="scoreArea">
+    <span>Score: <span id="scoreDisplay">0</span></span>
+    <span class="lives-display">Lives: <span id="livesDisplay">❤️❤️❤️</span></span>
+    <span>Timer: <span id="timerDisplay">0</span>s</span>
+    <span>Q: <span id="qNum">1</span>/10</span>
+  </div>
+
+  <div id="progressBar"><div id="progressFill"></div></div>
+
+  <div id="gameArea">
+    <div id="questionBox">
+      <div id="questionText">Loading question...</div>
+      <div id="answersArea"></div>
+    </div>
+    <div id="feedback"></div>
+    <div id="bonusCounter"></div>
+    <button id="hintBtn" onclick="showHint()">💡 Hint (costs 5 points)</button>
+    <div id="hintBox" id="hintText"></div>
+    <button id="nextBtn" onclick="nextQuestion()">Next Question ➡️</button>
+    <div id="debugBox">DEBUG: game_state=running | question_index=0 | null | undefined</div>
+  </div>
+
+  <div id="endScreen">
+    <h2>GAME OVER!!!</h2>
+    <p id="finalMsg"></p>
+    <p id="finalScore"></p>
+    <button id="restartBtn" onclick="restartGame()">🔄 Play Again (probably won't work)</button>
+  </div>
+</div>
+
+<script>
+// Grade 12 Quiz - made by a student at 2am
+
+var score = 0;
+var lives = 3;
+var currentQ = 0;
+var timerInterval;
+var timerCount = 0; // BUG: supposed to count DOWN but counts up
+var hintUsed = false;
+var answeredThisQuestion = false;
+
+// Questions with BUGS in the correct answers
+var questions = [
+  {
+    q: "What is the derivative of x² ?",
+    answers: ["2x", "x²", "x", "2"],
+    correct: 0, // this is right actually
+    hint: "Use the power rule! multiply by the exponent then subtract 1 from it... or was it add? idk",
+    wrong_feedback: "CORRECT!! Great job!! 🎉",  // BUG: wrong feedback on wrong answer for Q1
+    right_feedback: "WRONG!! Try harder!!"       // BUG: flipped
+  },
+  {
+    q: "Solve for x:  2x + 4 = 10",
+    answers: ["x = 7", "x = 3", "x = 6", "x = 14"],
+    correct: 1, // x=3 is correct
+    hint: "Subtract 4 from both sides... unless you don't want to",
+    wrong_feedback: "Incorrect 😢 The answer was 3",
+    right_feedback: "Correct! ✅"
+  },
+  {
+    q: "What is the powerhouse of the cell?",
+    answers: ["Mitochondria", "Nucleus", "Ribosome", "Cell Wall"],
+    correct: 3, // BUG: correct is 0 (mitochondria) but set to 3 (Cell Wall)
+    hint: "It starts with an M... or does it start with a C? Hard to say honestly",
+    wrong_feedback: "Incorrect!",
+    right_feedback: "Correct! 🎉"
+  },
+  {
+    q: "What is 15% of 200?",
+    answers: ["25", "30", "35", "15"],
+    correct: 1, // 30 is correct ✓
+    hint: "Multiply 200 by 0.15... or just guess lol",
+    wrong_feedback: "WRONG!",
+    right_feedback: "YES!!! 🎉"
+  },
+  {
+    q: "Which of the following is NOT a prime number?",
+    answers: ["17", "11", "9", "13"],
+    correct: 0, // BUG: 9 is not prime (correct is index 2), but set to 0 (17, which IS prime)
+    hint: "Prime numbers are only divisible by 1 and themselves. Check each one! (or don't)",
+    wrong_feedback: "Nope!",
+    right_feedback: "Yep! 👍"
+  },
+  {
+    q: "Romeo and Juliet was written by:",
+    answers: ["Charles Dickens", "William Shakespeare", "Mark Twain", "Homer"],
+    correct: 1, // Shakespeare ✓
+    hint: "Think about who wrote Hamlet, Macbeth, and also Romeo... and Juliet",
+    wrong_feedback: "WRONG!",
+    right_feedback: "RIGHT! 🎉"
+  },
+  {
+    q: "What is the chemical symbol for Gold?",
+    answers: ["Go", "Gd", "Au", "Gl"],
+    correct: 2, // Au ✓
+    hint: "It comes from the Latin word 'Aurum'. So the symbol is definitely... G something",
+    wrong_feedback: "Nope!",
+    right_feedback: "Yes!!"
+  },
+  {
+    q: "What is the area of a circle with radius 5? (use π ≈ 3.14)",
+    answers: ["78.5", "31.4", "25", "15.7"],
+    correct: 0, // 78.5 ✓ (π × 5²)
+    hint: "Area = π × r²  ... r is the radius. radius is 5. π is approximately 3.14. You got this! (maybe)",
+    wrong_feedback: "Nope!",
+    right_feedback: "CORRECT!! 🥳"
+  },
+  {
+    q: "In what year did World War II end?",
+    answers: ["1943", "1944", "1945", "1946"],
+    correct: 2, // 1945 ✓
+    hint: "It ended in the mid 1940s. One of these answers is correct. Probably.",
+    wrong_feedback: "Wrong!",
+    right_feedback: "Right!!"
+  },
+  {
+    q: "What is √144?",
+    answers: ["11", "14", "12", "13"],
+    correct: 3, // BUG: 12 is correct (index 2) but set to 3 (which is 13)
+    hint: "Think about what number times itself equals 144. Hint: it's between 11 and 13",
+    wrong_feedback: "Incorrect!",
+    right_feedback: "Correct! Great maths!!"
+  }
+];
+
+// Marquee animation - janky
+var marqueePos = 0;
+function animateMarquee() {
+  marqueePos -= 1.5;
+  var el = document.getElementById("marqueeText");
+  el.style.transform = "translateX(" + marqueePos + "px)";
+  if (marqueePos < -700) marqueePos = 200;
+  requestAnimationFrame(animateMarquee);
+}
+animateMarquee();
+
+// Timer counts UP (bug - should count down)
+function startTimer() {
+  clearInterval(timerInterval);
+  timerCount = 0;
+  timerInterval = setInterval(function() {
+    timerCount++;
+    document.getElementById("timerDisplay").textContent = timerCount;
+    // BUG: timer never actually ends the game, just keeps going forever
+  }, 1000);
+}
+
+function loadQuestion() {
+  if (currentQ >= questions.length) {
+    endGame();
+    return;
+  }
+
+  answeredThisQuestion = false;
+  hintUsed = false;
+  document.getElementById("hintBox").style.display = "none";
+  document.getElementById("feedback").textContent = "";
+  document.getElementById("bonusCounter").textContent = "";
+
+  var q = questions[currentQ];
+  document.getElementById("questionText").textContent = "Q" + (currentQ+1) + ": " + q.q;
+  document.getElementById("qNum").textContent = currentQ + 1;
+
+  // BUG: progress bar goes to wrong percentage
+  var pct = (currentQ / questions.length) * 100;
+  document.getElementById("progressFill").style.width = pct + "%"; // never reaches 100%
+
+  var area = document.getElementById("answersArea");
+  area.innerHTML = "";
+
+  // BUG: for question 1 only, the feedback messages are SWAPPED (wrong=correct, right=wrong)
+  for (var i = 0; i < q.answers.length; i++) {
+    var btn = document.createElement("button");
+    btn.className = "answerBtn";
+    btn.textContent = (i+1) + ") " + q.answers[i];
+    btn.setAttribute("data-index", i);
+    btn.onclick = function() { checkAnswer(parseInt(this.getAttribute("data-index"))); };
+    area.appendChild(btn);
+  }
+
+  // BUG: next button is ALWAYS visible (display:none then set display:block in CSS means it's always shown)
+  document.getElementById("nextBtn").style.display = "block";
+
+  // Update debug box with nonsense
+  document.getElementById("debugBox").textContent = 
+    "DEBUG: q=" + currentQ + " | score=" + score + " | lives=" + undefined + " | state=maybe_running??";
+
+  startTimer();
+}
+
+function checkAnswer(selected) {
+  if (answeredThisQuestion) return;
+  answeredThisQuestion = true;
+
+  var q = questions[currentQ];
+  var feedbackEl = document.getElementById("feedback");
+  var buttons = document.querySelectorAll(".answerBtn");
+
+  // Disable all buttons
+  buttons.forEach(function(b) { b.disabled = true; });
+
+  if (selected === q.correct) {
+    // BUG: for question 1, right_feedback says "WRONG!!"
+    feedbackEl.textContent = q.right_feedback;
+    feedbackEl.style.color = "green";
+
+    // BUG: score calculation is broken - sometimes subtracts instead of adds
+    var points = 10;
+    if (hintUsed) points = points - 5; // this part works
+    if (currentQ % 3 === 0) points = points - points; // BUG: gives 0 points every 3rd question
+    score += points;
+
+    // BUG: show stars but they appear at wrong position and don't disappear
+    var stars = document.getElementById("floatingStars");
+    stars.style.display = "block";
+    stars.style.top = "50px";
+    stars.style.left = "50px";
+    setTimeout(function() { stars.style.display = "none"; }, 800);
+
+    document.getElementById("bonusCounter").textContent = "+" + points + " points!!!";
+
+  } else {
+    // BUG: for question 1, wrong_feedback says "CORRECT!! 🎉"
+    feedbackEl.textContent = q.wrong_feedback;
+    feedbackEl.style.color = "red";
+
+    lives--;
+    // BUG: lives display doesn't update properly - always shows same hearts
+    var heartsStr = "";
+    for (var h = 0; h < lives; h++) heartsStr += "❤️";
+    document.getElementById("livesDisplay").textContent = heartsStr || "💀";
+
+    // BUG: score goes negative when lives lost AND score deduction double-counted
+    score -= 3;
+    score -= (10 - score); // BUG: this makes score wildly wrong
+
+    if (lives <= 0) {
+      // BUG: game over check is inside else, but due to bugs score might be negative long before
+      endGame();
+      return;
+    }
+  }
+
+  document.getElementById("scoreDisplay").textContent = score;
+}
+
+function showHint() {
+  if (hintUsed) {
+    document.getElementById("hintBox").textContent = "you already used a hint!! no more hints!! sorry!!";
+    document.getElementById("hintBox").style.display = "block";
+    return;
+  }
+  hintUsed = true;
+  // BUG: deducts 5 pts immediately regardless of whether they get it right
+  score -= 5;
+  document.getElementById("scoreDisplay").textContent = score;
+  var q = questions[currentQ];
+  // BUG: hintBox has two IDs (id="hintBox" and id="hintText") - second one is ignored
+  document.getElementById("hintBox").textContent = "💡 HINT: " + q.hint;
+  document.getElementById("hintBox").style.display = "block";
+}
+
+function nextQuestion() {
+  // BUG: you can click Next before answering - skips question without penalty
+  currentQ++;
+  if (currentQ >= questions.length) {
+    endGame();
+  } else {
+    loadQuestion();
+  }
+}
+
+function endGame() {
+  clearInterval(timerInterval);
+  document.getElementById("gameArea").style.display = "none";
+  document.getElementById("endScreen").style.display = "block";
+
+  // BUG: final score shown is different from what was displayed during game (recalculated wrong)
+  var displayScore = score * 1; // seems fine but...
+  if (displayScore < 0) displayScore = displayScore * -1; // BUG: always shows positive even if should be 0
+
+  document.getElementById("finalScore").textContent = "Your Score: " + displayScore + " / " + (questions.length * 10);
+
+  var msg;
+  // BUG: thresholds are wrong - 80+ says "FAILED", below 30 says "GREAT WORK"
+  if (displayScore >= 80) {
+    msg = "YOU FAILED!! 😢 Better luck next time!! Study more!!";
+  } else if (displayScore >= 50) {
+    msg = "Meh. You passed. Barely. Whatever.";
+  } else if (displayScore >= 30) {
+    msg = "GREAT WORK!! YOU ARE A GENIUS!! 🎉🎉🎉";
+  } else {
+    msg = "...ok";
+  }
+
+  document.getElementById("finalMsg").textContent = msg;
+
+  // BUG: marquee keeps going even on end screen, now says confusing thing
+  document.getElementById("marqueeText").textContent = "⚡ GAME OVER!! YOUR SCORE WAS: " + displayScore + " ... OR WAS IT?? WE'RE NOT SURE!! ⚡ ";
+}
+
+function restartGame() {
+  // BUG: resets some variables but not all - lives don't reset
+  score = 0;
+  currentQ = 0;
+  // lives = 3; // FORGOT TO UNCOMMENT THIS
+  document.getElementById("scoreDisplay").textContent = score;
+  document.getElementById("gameArea").style.display = "block";
+  document.getElementById("endScreen").style.display = "none";
+  document.getElementById("livesDisplay").textContent = "❤️❤️❤️"; // visual reset but lives var is still 0
+  loadQuestion();
+}
+
+// Start the game
+loadQuestion();
+</script>
+</body>
+</html>
